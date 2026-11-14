@@ -80,15 +80,105 @@ footer{text-align:center;color:#777;font-size:12px;margin:30px}
 <footer>WHITEBOARD AI · CREATE YOUR IDEAS</footer>
 </main>
 
+
 <script>
-document.getElementById("videoForm").addEventListener("submit",function(e){
-e.preventDefault();
-const topic=document.getElementById("topic").value.trim();
-if(!topic)return;
-document.getElementById("status").style.display="block";
-document.getElementById("status").textContent=
-"Đã nhận chủ đề! Đây là bản giao diện thử nghiệm. Hệ thống AI và xuất video sẽ được tích hợp ở bước tiếp theo.";
+const form = document.getElementById("videoForm");
+const statusBox = document.getElementById("status");
+const submitButton = form.querySelector("button");
+
+form.addEventListener("submit", async function(e) {
+  e.preventDefault();
+
+  const topic = document.getElementById("topic").value.trim();
+  if (!topic) return;
+
+  statusBox.style.display = "block";
+  statusBox.textContent = "Đang gửi chủ đề đến AI...";
+  submitButton.disabled = true;
+
+  try {
+    const response = await fetch("/api/generate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        topic,
+        duration: document.getElementById("duration").value,
+        format: document.getElementById("format").value,
+        voice: document.getElementById("voice").value,
+        style: document.getElementById("style").value
+      })
+    });
+
+    const data = await response.json();
+
+    if (!response.ok || !data.success) {
+      throw new Error(data.error || "Có lỗi xảy ra.");
+    }
+
+    let script = data.script;
+
+    if (typeof script === "string") {
+      try {
+        script = JSON.parse(script);
+      } catch {
+        script = { introduction: script };
+      }
+    }
+
+    const output = document.createElement("div");
+    output.id = "ai-result";
+    output.style.cssText =
+      "margin-top:18px;padding:16px;background:#151515;border:1px solid #333;border-radius:12px;white-space:pre-wrap;color:white";
+
+    const title = document.createElement("h2");
+    title.textContent = script.title || "Kịch bản video";
+    output.appendChild(title);
+
+    if (script.introduction) {
+      const p = document.createElement("p");
+      p.textContent = script.introduction;
+      output.appendChild(p);
+    }
+
+    if (Array.isArray(script.scenes)) {
+      script.scenes.forEach((scene, i) => {
+        const heading = document.createElement("h3");
+        heading.textContent = "Phân cảnh " + (scene.scene || i + 1);
+        output.appendChild(heading);
+
+        [
+          ["Lời đọc", scene.narration],
+          ["Hình vẽ", scene.drawing],
+          ["Phụ đề", scene.subtitle]
+        ].forEach(([label, value]) => {
+          if (value) {
+            const p = document.createElement("p");
+            p.textContent = label + ": " + value;
+            output.appendChild(p);
+          }
+        });
+      });
+    }
+
+    if (script.conclusion) {
+      const p = document.createElement("p");
+      p.textContent = "Kết luận: " + script.conclusion;
+      output.appendChild(p);
+    }
+
+    const old = document.getElementById("ai-result");
+    if (old) old.remove();
+
+    statusBox.textContent = "Đã tạo xong kịch bản AI.";
+    statusBox.after(output);
+
+  } catch (error) {
+    statusBox.textContent = "Chưa tạo được kịch bản: " + error.message;
+  } finally {
+    submitButton.disabled = false;
+  }
 });
 </script>
+
 </body>
 </html>
