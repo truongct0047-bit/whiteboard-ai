@@ -1,0 +1,94 @@
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#080808">
+<title>WHITEBOARD AI</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#080808;color:white;font-family:Arial,sans-serif}
+main{max-width:700px;margin:auto;padding:28px 18px}
+header{display:flex;justify-content:space-between;padding:12px 0 50px}
+h1{font-size:42px;line-height:1.1;margin-bottom:12px}
+p{color:#aaa;line-height:1.6}
+.panel{background:#151515;border:1px solid #333;border-radius:18px;padding:20px;margin-top:28px}
+label{display:block;margin:18px 0 8px;font-weight:bold}
+textarea,select{width:100%;padding:14px;background:#080808;color:white;border:1px solid #444;border-radius:10px;font-size:16px}
+textarea{height:120px;resize:vertical}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+button{width:100%;padding:16px;margin-top:24px;background:white;color:black;border:0;border-radius:12px;font-size:16px;font-weight:bold}
+#status{display:none;margin-top:18px;padding:14px;background:#222;border-radius:10px;color:#ddd}
+footer{text-align:center;color:#777;font-size:12px;margin:30px}
+@media(max-width:450px){.grid{grid-template-columns:1fr}h1{font-size:36px}}
+</style>
+</head>
+<body>
+<main>
+<header>
+<strong>✳ WHITEBOARD AI</strong>
+<span> BETA </span>
+</header>
+
+<h1>Biến ý tưởng<br>thành video.</h1>
+<p>Tạo video kiến thức phong cách vẽ tay, có giọng đọc và phụ đề tiếng Việt.</p>
+
+<section class="panel">
+<form id="videoForm">
+<label for="topic">Chủ đề video</label>
+<textarea id="topic" required placeholder="Ví dụ: Lịch sử hình thành vũ trụ..."></textarea>
+
+<div class="grid">
+<div>
+<label for="duration">Thời lượng</label>
+<select id="duration">
+<option>3 phút</option>
+<option selected>5 phút</option>
+<option>10 phút</option>
+<option>30 phút</option>
+</select>
+</div>
+<div>
+<label for="format">Tỷ lệ video</label>
+<select id="format">
+<option>16:9 YouTube</option>
+<option>9:16 TikTok</option>
+<option>1:1 Vuông</option>
+</select>
+</div>
+<div>
+<label for="voice">Giọng đọc</label>
+<select id="voice">
+<option>Giọng nữ</option>
+<option>Giọng nam</option>
+</select>
+</div>
+<div>
+<label for="style">Phong cách</label>
+<select id="style">
+<option>Vẽ tay trắng đen</option>
+<option>Phấn bảng</option>
+</select>
+</div>
+</div>
+
+<button type="submit">✦ TẠO VIDEO</button>
+<div id="status" role="status"></div>
+</form>
+</section>
+<footer>WHITEBOARD AI · CREATE YOUR IDEAS</footer>
+</main>
+
+<script>
+document.getElementById("videoForm").addEventListener("submit",function(e){
+e.preventDefault();
+const topic=document.getElementById("topic").value.trim();
+if(!topic)return;
+document.getElementById("status").style.display="block";
+document.getElementById("status").textContent=
+"Đã nhận chủ đề! Đây là bản giao diện thử nghiệm. Hệ thống AI và xuất video sẽ được tích hợp ở bước tiếp theo.";
+});
+</script>
+</body>
+</html>
