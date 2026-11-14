@@ -2,7 +2,52 @@
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
+    if (url.pathname === "/api/image") {
+      if (request.method !== "POST") {
+        return Response.json(
+          { error: "Chỉ hỗ trợ POST" },
+          { status: 405 }
+        );
+      }
 
+      try {
+        const body = await request.json();
+        const description = String(body.description || "").trim();
+        const style = String(body.style || "Vẽ tay trắng đen").trim();
+
+        if (!description || description.length > 1500) {
+          return Response.json(
+            { error: "Mô tả hình ảnh không hợp lệ." },
+            { status: 400 }
+          );
+        }
+
+        const prompt =
+          "A clean whiteboard animation illustration, black ink hand-drawn line art on a pure white background, simple educational infographic, bold smooth outlines, minimal details, no color, no text, no watermark. Style: " +
+          style +
+          ". Scene: " + description;
+
+        const result = await env.AI.run(
+          "@cf/black-forest-labs/flux-1-schnell",
+          { prompt, steps: 4 }
+        );
+
+        if (!result || !result.image) {
+          throw new Error("Không nhận được hình ảnh.");
+        }
+
+        return Response.json({
+          success: true,
+          image: "data:image/jpeg;base64," + result.image
+        });
+
+      } catch (error) {
+        return Response.json(
+          { error: "Không tạo được hình: " + error.message },
+          { status: 500 }
+        );
+      }
+    }
     if (url.pathname === "/api/generate") {
       if (request.method !== "POST") {
         return Response.json(
