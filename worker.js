@@ -57,11 +57,34 @@ export default {
           "no captions, no watermark, no border. " +
           "Style: " + style + ".";
 
+                // Chọn kích thước ảnh theo tỷ lệ video.
+        const requestedRatio = String(body.aspectRatio || "16:9 YouTube");
+        let width = 1280;
+        let height = 720;
+
+        if (requestedRatio.startsWith("9:16")) {
+          width = 720;
+          height = 1280;
+        } else if (requestedRatio.startsWith("1:1")) {
+          width = 1024;
+          height = 1024;
+        }
+
+        // Tạo ảnh bằng FLUX.2 Klein 4B.
+        const formData = new FormData();
+        formData.append("prompt", prompt.slice(0, 2048));
+        formData.append("width", String(width));
+        formData.append("height", String(height));
+
+        const multipartResponse = new Response(formData);
+
         const result = await env.AI.run(
-          "@cf/black-forest-labs/flux-1-schnell",
+          "@cf/black-forest-labs/flux-2-klein-4b",
           {
-            prompt: prompt.slice(0, 2048),
-            steps: 4
+            multipart: {
+              body: multipartResponse.body,
+              contentType: multipartResponse.headers.get("content-type")
+            }
           }
         );
 
