@@ -23,7 +23,8 @@ button{width:100%;padding:16px;margin-top:24px;background:white;color:black;bord
 footer{text-align:center;color:#777;font-size:12px;margin:30px}
 @media(max-width:450px){.grid{grid-template-columns:1fr}h1{font-size:36px}}
 
-  /* KHU VỰC HOẠT ẢNH VẼ TỪNG CHI TIẾT */
+
+/* KHU VỰC HOẠT ẢNH VẼ TỪNG CHI TIẾT */
 .drawing-animation{
   width:100%;
   aspect-ratio:16/9;
@@ -32,32 +33,27 @@ footer{text-align:center;color:#777;font-size:12px;margin:30px}
   overflow:hidden;
   margin-top:14px;
 }
+
 .drawing-animation svg{
   width:100%;
   height:100%;
   display:block;
 }
+
+/* Nét vẽ được JavaScript điều khiển */
 .drawing-animation .draw-line{
   fill:none;
   stroke:#171717;
-  stroke-width:3;
+  stroke-width:4;
   stroke-linecap:round;
   stroke-linejoin:round;
-  stroke-dasharray:1000;
-  stroke-dashoffset:1000;
-  animation:drawStroke 2s ease forwards;
 }
+
+/* Màu tô được JavaScript điều khiển */
 .drawing-animation .color-fill{
   opacity:0;
-  animation:showColor .8s ease forwards;
-  animation-delay:2s;
 }
-@keyframes drawStroke{
-  to{stroke-dashoffset:0}
-}
-@keyframes showColor{
-  to{opacity:1}
-}
+
   </style>
 </head>
 <body>
@@ -115,44 +111,35 @@ footer{text-align:center;color:#777;font-size:12px;margin:30px}
 </section>
 <footer>WHITEBOARD AI · CREATE YOUR IDEAS</footer>
 </main>
-<section class="panel">
+
+<section class="panel" id="animation-lab">
   <h2>THỬ NGHIỆM VẼ TỪNG NÉT</h2>
-  <p>Demo: vẽ châu chấu và tô màu sau khi hoàn thành nét vẽ.</p>
+  <p>Vẽ từng nhóm chi tiết, sau đó tô màu hoàn thiện.</p>
+
+  <div class="grid">
+    <button type="button" id="demoGrasshopper">
+      MẪU CHÂU CHẤU
+    </button>
+    <button type="button" id="demoPlant">
+      MẪU CÂY NON
+    </button>
+  </div>
 
   <div class="drawing-animation">
-    <svg viewBox="0 0 800 450" xmlns="http://www.w3.org/2000/svg">
-
-  <!-- MÀU TÔ -->
-  <g class="color-fill" style="animation-delay:4s">
-    <path d="M260 220 Q330 170 450 205 Q510 220 530 250 Q440 285 330 260 Z" fill="#79b84a"/>
-    <ellipse cx="535" cy="205" rx="48" ry="40" fill="#8ac653"/>
-    <path d="M300 220 Q250 180 220 210 Q245 260 310 260 Z" fill="#a1d66b"/>
-    <path d="M390 255 Q350 310 300 355 L340 370 Q400 320 430 270 Z" fill="#79b84a"/>
-    <path d="M450 260 Q490 310 550 350 L570 330 Q520 270 480 245 Z" fill="#79b84a"/>
-    <path d="M530 220 L590 245 L580 255 L525 240 Z" fill="#79b84a"/>
-    <circle cx="550" cy="190" r="9" fill="#171717"/>
-  </g>
-
-  <!-- NÉT VẼ -->
-  <g class="draw-line">
-    <path d="M260 220 Q330 170 450 205 Q510 220 530 250 Q440 285 330 260 Z"/>
-    <path d="M535 165 Q575 130 600 110"/>
-    <path d="M550 168 Q610 145 635 140"/>
-    <ellipse cx="535" cy="205" rx="48" ry="40"/>
-    <circle cx="550" cy="190" r="9"/>
-    <path d="M300 220 Q250 180 220 210 Q245 260 310 260"/>
-    <path d="M390 255 Q350 310 300 355 L340 370 Q400 320 430 270"/>
-    <path d="M450 260 Q490 310 550 350 L570 330 Q520 270 480 245"/>
-    <path d="M530 220 L590 245 L580 255 L525 240"/>
-    <path d="M300 235 Q260 280 240 330"/>
-    <path d="M240 330 L215 340"/>
-    <path d="M550 245 L610 290 L650 285"/>
-    <path d="M650 285 L665 270"/>
-  </g>
-
-</svg>
+    <svg id="animationSvg"
+      viewBox="0 0 800 450"
+      xmlns="http://www.w3.org/2000/svg">
+    </svg>
   </div>
+
+  <button type="button" id="playAnimation">
+    ▶ VẼ LẠI TỪ ĐẦU
+  </button>
+
+  <p id="animationStatus">Chọn một mẫu để bắt đầu.</p>
 </section>
+
+  
 
 <script>
 const form = document.getElementById("videoForm");
@@ -336,6 +323,259 @@ img.style.cssText =
     submitButton.disabled = false;
   }
 });
+  
+// ==========================================
+// WHITEBOARD AI - BỘ MÁY VẼ TUẦN TỰ TỔNG QUÁT
+// ==========================================
+
+const animationSvg = document.getElementById("animationSvg");
+const animationStatus = document.getElementById("animationStatus");
+
+let currentDrawing = null;
+let animationRun = 0;
+
+// Dữ liệu mẫu chỉ phục vụ kiểm tra bộ máy.
+// Cấu trúc này có thể dùng cho mọi chủ đề.
+const drawingSamples = {
+
+  grasshopper: {
+    name: "Châu chấu",
+    groups: [
+      {
+        name: "Thân",
+        strokes: [
+          "M260 220 Q330 170 450 205 Q510 220 530 250 Q440 285 330 260 Z"
+        ],
+        fills: [
+          { d: "M260 220 Q330 170 450 205 Q510 220 530 250 Q440 285 330 260 Z", color: "#79b84a" }
+        ]
+      },
+      {
+        name: "Đầu và râu",
+        strokes: [
+          "M535 165 Q575 130 600 110",
+          "M550 168 Q610 145 635 140",
+          "M535 165 Q575 165 583 205 Q580 245 535 245 Q490 240 487 205 Q490 170 535 165 Z",
+
+        ],
+        fills: [
+          { d: "M535 165 Q575 165 583 205 Q580 245 535 245 Q490 240 487 205 Q490 170 535 165 Z", color: "#8ac653" },
+          { d: "M545 185 Q555 180 560 190 Q560 200 550 200 Q542 198 545 185 Z", color: "#171717" }
+        ]
+      },
+      {
+        name: "Cánh",
+        strokes: [
+          "M300 220 Q250 180 220 210 Q245 260 310 260 Z"
+        ],
+        fills: [
+          { d: "M300 220 Q250 180 220 210 Q245 260 310 260 Z", color: "#a1d66b" }
+        ]
+      },
+      {
+        name: "Chân",
+        strokes: [
+          "M390 255 Q350 310 300 355 L340 370 Q400 320 430 270 Z",
+          "M450 260 Q490 310 550 350 L570 330 Q520 270 480 245 Z",
+          "M300 235 Q260 280 240 330",
+          "M240 330 L215 340",
+          "M550 245 L610 290 L650 285",
+          "M650 285 L665 270"
+        ],
+        fills: [
+          { d: "M390 255 Q350 310 300 355 L340 370 Q400 320 430 270 Z", color: "#79b84a" },
+          { d: "M450 260 Q490 310 550 350 L570 330 Q520 270 480 245 Z", color: "#79b84a" }
+        ]
+      }
+    ]
+  },
+
+  plant: {
+    name: "Cây non",
+    groups: [
+      {
+        name: "Thân cây",
+        strokes: [
+          "M400 370 Q395 290 400 200"
+        ],
+        fills: [
+          { d: "M390 370 Q390 285 395 200 L405 200 Q410 285 410 370 Z", color: "#72a94b" }
+        ]
+      },
+      {
+        name: "Lá bên trái",
+        strokes: [
+          "M400 260 Q330 180 260 215 Q300 285 400 260 Z"
+        ],
+        fills: [
+          { d: "M400 260 Q330 180 260 215 Q300 285 400 260 Z", color: "#70b94e" }
+        ]
+      },
+      {
+        name: "Lá bên phải",
+        strokes: [
+          "M400 220 Q455 145 535 165 Q510 245 400 220 Z"
+        ],
+        fills: [
+          { d: "M400 220 Q455 145 535 165 Q510 245 400 220 Z", color: "#8bcf58" }
+        ]
+      },
+      {
+        name: "Đất",
+        strokes: [
+          "M270 370 Q400 350 530 370",
+          "M300 385 Q400 400 500 385"
+        ],
+        fills: [
+          { d: "M270 370 Q400 350 530 370 Q400 405 270 370 Z", color: "#a8794f" }
+        ]
+      }
+    ]
+  }
+};
+
+function createSvgElement(tag) {
+  return document.createElementNS(
+    "http://www.w3.org/2000/svg",
+    tag
+  );
+}
+
+function clearAnimation() {
+  animationRun++;
+  animationSvg.replaceChildren();
+}
+
+function wait(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+async function playDrawing(data) {
+  if (!data || !Array.isArray(data.groups)) return;
+
+  clearAnimation();
+  const runId = animationRun;
+
+  animationStatus.textContent = "Bắt đầu vẽ: " + data.name;
+
+  for (const group of data.groups) {
+    if (runId !== animationRun) return;
+
+    animationStatus.textContent = "Đang vẽ: " + group.name;
+
+    const fillElements = [];
+
+    // Tạo các vùng màu nhưng giữ ẩn.
+    for (const fill of (group.fills || [])) {
+      const path = createSvgElement("path");
+      path.setAttribute("d", fill.d);
+      path.setAttribute("fill", fill.color);
+      path.setAttribute("opacity", "0");
+      animationSvg.appendChild(path);
+      fillElements.push(path);
+    }
+
+    // Vẽ tuần tự từng nét.
+    for (const stroke of (group.strokes || [])) {
+      if (runId !== animationRun) return;
+
+      const path = createSvgElement("path");
+      path.setAttribute("d", stroke);
+      path.setAttribute("fill", "none");
+      path.setAttribute("stroke", "#171717");
+      path.setAttribute("stroke-width", "4");
+      path.setAttribute("stroke-linecap", "round");
+      path.setAttribute("stroke-linejoin", "round");
+
+      animationSvg.appendChild(path);
+
+      const length = path.getTotalLength();
+
+      // Bỏ qua nét không có chiều dài.
+      if (!Number.isFinite(length) || length < 0.1) {
+        path.remove();
+        continue;
+      }
+
+      path.style.strokeDasharray = length;
+      path.style.strokeDashoffset = length;
+
+      const duration = Math.max(
+        350,
+        Math.min(1600, length * 3)
+      );
+
+      const animation = path.animate(
+        [
+          { strokeDashoffset: length },
+          { strokeDashoffset: 0 }
+        ],
+        {
+          duration,
+          easing: "linear",
+          fill: "forwards"
+        }
+      );
+
+      await animation.finished.catch(() => {});
+
+      if (runId !== animationRun) return;
+
+      path.style.strokeDashoffset = "0";
+    }
+
+    // Tô màu và chờ hoàn thành trước khi sang nhóm mới.
+    for (const fillElement of fillElements) {
+      if (runId !== animationRun) return;
+
+      const colorAnimation = fillElement.animate(
+        [
+          { opacity: 0 },
+          { opacity: 1 }
+        ],
+        {
+          duration: 650,
+          easing: "ease",
+          fill: "forwards"
+        }
+      );
+
+      await colorAnimation.finished.catch(() => {});
+
+      if (runId !== animationRun) return;
+
+      fillElement.setAttribute("opacity", "1");
+    }
+
+    await wait(250);
+  }
+
+  if (runId === animationRun) {
+    animationStatus.textContent =
+      "Đã hoàn thành: " + data.name;
+  }
+}
+function selectDrawing(name) {
+  currentDrawing = drawingSamples[name];
+  playDrawing(currentDrawing);
+}
+document.getElementById("demoGrasshopper")
+  .addEventListener("click", () => {
+    selectDrawing("grasshopper");
+  });
+
+document.getElementById("demoPlant")
+  .addEventListener("click", () => {
+    selectDrawing("plant");
+  });
+
+document.getElementById("playAnimation")
+  .addEventListener("click", () => {
+    if (currentDrawing) {
+      playDrawing(currentDrawing);
+    }
+  });
+
 </script>
 
 </body>
