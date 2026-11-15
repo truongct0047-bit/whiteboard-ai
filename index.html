@@ -452,191 +452,238 @@ function wait(ms) {
   
 
 
+
 function createDrawingHand() {
   const hand = createSvgElement("g");
   hand.setAttribute("pointer-events", "none");
 
-  // Bảng màu da và đường viền
-  const outline = "#80543f";
-  const skin = "#f2b58e";
-  const lightSkin = "#ffd0ad";
-  const shadowSkin = "#d99470";
+  const outline = "#39251f";
+  const skin = "#f5ad82";
+  const light = "#ffd0ad";
+  const shadowColor = "#d98261";
+  const blue = "#1475d1";
 
-  // Bút chì
-  const pen = createSvgElement("path");
-  pen.setAttribute("d", "M-88 0 L-7 0");
-  pen.setAttribute("stroke", "#292929");
-  pen.setAttribute("stroke-width", "11");
-  pen.setAttribute("stroke-linecap", "round");
-  hand.appendChild(pen);
-
-  // Thân bút màu vàng
+  // Thân bút xanh: đầu bút nằm đúng tại tọa độ (0,0)
   const penBody = createSvgElement("path");
-  penBody.setAttribute("d", "M-77 0 L-13 0");
-  penBody.setAttribute("stroke", "#f4bd42");
-  penBody.setAttribute("stroke-width", "7");
-  penBody.setAttribute("stroke-linecap", "round");
+  penBody.setAttribute(
+    "d",
+    "M0 0 L13 -18 L174 -207 L191 -222 " +
+    "L205 -210 L190 -193 L29 -8 L13 5 Z"
+  );
+  penBody.setAttribute("fill", blue);
+  penBody.setAttribute("stroke", outline);
+  penBody.setAttribute("stroke-width", "3");
+  penBody.setAttribute("stroke-linejoin", "round");
   hand.appendChild(penBody);
 
-  // Vòng kim loại trên bút
-  const ring = createSvgElement("path");
-  ring.setAttribute("d", "M-23 -4 L-23 4");
-  ring.setAttribute("stroke", "#9b762d");
-  ring.setAttribute("stroke-width", "2");
-  hand.appendChild(ring);
+  // Ánh sáng trên thân bút
+  const penHighlight = createSvgElement("path");
+  penHighlight.setAttribute(
+    "d",
+    "M20 -25 L177 -207"
+  );
+  penHighlight.setAttribute("fill", "none");
+  penHighlight.setAttribute("stroke", "#8ed5ff");
+  penHighlight.setAttribute("stroke-width", "4");
+  penHighlight.setAttribute("stroke-linecap", "round");
+  hand.appendChild(penHighlight);
+
+  // Đầu bút
+  const penTip = createSvgElement("path");
+  penTip.setAttribute(
+    "d",
+    "M0 0 L13 -18 L17 -5 L7 9 Z"
+  );
+  penTip.setAttribute("fill", "#30343a");
+  penTip.setAttribute("stroke", outline);
+  penTip.setAttribute("stroke-width", "2");
+  hand.appendChild(penTip);
 
   // Ngòi bút
-  const tip = createSvgElement("path");
-  tip.setAttribute("d", "M0 0 L-13 -5 L-13 5 Z");
-  tip.setAttribute("fill", "#292929");
-  hand.appendChild(tip);
+  const nib = createSvgElement("path");
+  nib.setAttribute("d", "M0 0 L7 9 L-3 14 Z");
+  nib.setAttribute("fill", "#171717");
+  hand.appendChild(nib);
 
-  // Tay áo
+  // Tay áo ngắn
   const sleeve = createSvgElement("path");
   sleeve.setAttribute(
     "d",
-    "M-91 -21 Q-77 -29 -61 -19 " +
-    "L-48 17 Q-65 29 -82 19 Z"
+    "M190 -28 Q218 -49 247 -24 " +
+    "L274 22 Q263 58 225 66 " +
+    "L190 35 Q174 2 190 -28 Z"
   );
-  sleeve.setAttribute("fill", "#4d91d8");
-  sleeve.setAttribute("stroke", "#292929");
-  sleeve.setAttribute("stroke-width", "3");
+  sleeve.setAttribute("fill", "#1769b5");
+  sleeve.setAttribute("stroke", outline);
+  sleeve.setAttribute("stroke-width", "4");
   sleeve.setAttribute("stroke-linejoin", "round");
   hand.appendChild(sleeve);
 
-  // Viền cổ tay áo
+  // Nếp gấp tay áo
+  const sleeveFold = createSvgElement("path");
+  sleeveFold.setAttribute(
+    "d",
+    "M222 -22 Q240 3 250 38 M239 -24 Q259 1 263 23"
+  );
+  sleeveFold.setAttribute("fill", "none");
+  sleeveFold.setAttribute("stroke", "#65b5f1");
+  sleeveFold.setAttribute("stroke-width", "5");
+  sleeveFold.setAttribute("stroke-linecap", "round");
+  hand.appendChild(sleeveFold);
+
+  // Cổ tay áo
   const cuff = createSvgElement("path");
   cuff.setAttribute(
     "d",
-    "M-65 -22 Q-55 -25 -49 -17 L-41 13 Q-50 22 -59 20 Z"
+    "M183 -31 Q204 -46 220 -25 " +
+    "L244 17 Q234 39 215 43 " +
+    "L188 14 Q174 -10 183 -31 Z"
   );
-  cuff.setAttribute("fill", "#77b5ed");
-  cuff.setAttribute("stroke", "#292929");
-  cuff.setAttribute("stroke-width", "2.5");
+  cuff.setAttribute("fill", "#54a8e8");
+  cuff.setAttribute("stroke", outline);
+  cuff.setAttribute("stroke-width", "3");
   hand.appendChild(cuff);
 
   // Cổ tay
   const wrist = createSvgElement("path");
   wrist.setAttribute(
     "d",
-    "M-56 -16 Q-45 -23 -36 -14 " +
-    "L-28 15 Q-39 25 -51 17 Z"
+    "M170 -65 Q195 -83 215 -61 " +
+    "L235 -13 Q225 12 205 22 " +
+    "L179 -4 Q160 -35 170 -65 Z"
   );
   wrist.setAttribute("fill", skin);
   wrist.setAttribute("stroke", outline);
-  wrist.setAttribute("stroke-width", "2.5");
+  wrist.setAttribute("stroke-width", "4");
   hand.appendChild(wrist);
 
-  // Lòng bàn tay đầy đặn
+  // Lòng bàn tay lớn
   const palm = createSvgElement("path");
   palm.setAttribute(
     "d",
-    "M-48 -17 " +
-    "Q-43 -26 -34 -23 " +
-    "Q-27 -28 -20 -21 " +
-    "Q-12 -23 -8 -14 " +
-    "Q-5 -6 -12 1 " +
-    "Q-5 10 -13 20 " +
-    "Q-22 29 -37 23 " +
-    "Q-51 19 -55 7 " +
-    "Q-58 -5 -48 -17 Z"
+    "M65 -154 " +
+    "Q81 -181 112 -174 " +
+    "Q132 -188 155 -166 " +
+    "Q177 -153 183 -126 " +
+    "Q207 -108 211 -76 " +
+    "Q218 -38 195 -12 " +
+    "Q171 12 137 0 " +
+    "L83 -22 " +
+    "Q54 -37 44 -66 " +
+    "Q35 -99 65 -154 Z"
   );
   palm.setAttribute("fill", skin);
   palm.setAttribute("stroke", outline);
-  palm.setAttribute("stroke-width", "3");
+  palm.setAttribute("stroke-width", "4");
   palm.setAttribute("stroke-linejoin", "round");
   hand.appendChild(palm);
 
-  // Ngón trỏ
-  const indexFinger = createSvgElement("path");
-  indexFinger.setAttribute(
+  // Ngón trỏ ôm bút
+  const index = createSvgElement("path");
+  index.setAttribute(
     "d",
-    "M-39 -17 Q-31 -27 -23 -20 " +
-    "L-13 -11 Q-8 -6 -13 -1 " +
-    "Q-18 3 -23 -3 L-34 -7 Z"
+    "M69 -150 Q83 -178 108 -163 " +
+    "L151 -126 Q166 -111 151 -95 " +
+    "Q137 -81 120 -96 " +
+    "L77 -124 Q61 -133 69 -150 Z"
   );
-  indexFinger.setAttribute("fill", lightSkin);
-  indexFinger.setAttribute("stroke", outline);
-  indexFinger.setAttribute("stroke-width", "2.5");
-  hand.appendChild(indexFinger);
+  index.setAttribute("fill", light);
+  index.setAttribute("stroke", outline);
+  index.setAttribute("stroke-width", "4");
+  hand.appendChild(index);
+
+  // Ngón cái nằm phía trước thân bút
+  const thumb = createSvgElement("path");
+  thumb.setAttribute(
+    "d",
+    "M57 -92 Q69 -119 94 -110 " +
+    "L133 -88 Q151 -77 143 -57 " +
+    "Q133 -38 112 -49 " +
+    "L76 -67 Q51 -69 57 -92 Z"
+  );
+  thumb.setAttribute("fill", "#ffc39f");
+  thumb.setAttribute("stroke", outline);
+  thumb.setAttribute("stroke-width", "4");
+  hand.appendChild(thumb);
 
   // Ngón giữa
-  const middleFinger = createSvgElement("path");
-  middleFinger.setAttribute(
+  const middle = createSvgElement("path");
+  middle.setAttribute(
     "d",
-    "M-47 -12 Q-43 -23 -35 -20 " +
-    "L-24 -12 Q-19 -7 -24 -2 " +
-    "Q-29 2 -34 -3 L-46 -4 Z"
+    "M77 -42 Q92 -63 113 -49 " +
+    "L145 -27 Q160 -14 146 3 " +
+    "Q132 16 113 2 L83 -18 Q67 -27 77 -42 Z"
   );
-  middleFinger.setAttribute("fill", skin);
-  middleFinger.setAttribute("stroke", outline);
-  middleFinger.setAttribute("stroke-width", "2.5");
-  hand.appendChild(middleFinger);
+  middle.setAttribute("fill", skin);
+  middle.setAttribute("stroke", outline);
+  middle.setAttribute("stroke-width", "4");
+  hand.appendChild(middle);
 
   // Ngón áp út
   const ringFinger = createSvgElement("path");
   ringFinger.setAttribute(
     "d",
-    "M-51 -4 Q-47 -14 -40 -12 " +
-    "L-31 -5 Q-27 0 -32 5 " +
-    "Q-37 9 -42 4 L-52 3 Z"
+    "M103 -18 Q116 -36 135 -23 " +
+    "L159 -5 Q172 9 159 24 " +
+    "Q145 37 129 22 L106 5 Q94 -5 103 -18 Z"
   );
-  ringFinger.setAttribute("fill", lightSkin);
+  ringFinger.setAttribute("fill", light);
   ringFinger.setAttribute("stroke", outline);
-  ringFinger.setAttribute("stroke-width", "2.5");
+  ringFinger.setAttribute("stroke-width", "4");
   hand.appendChild(ringFinger);
 
   // Ngón út
   const littleFinger = createSvgElement("path");
   littleFinger.setAttribute(
     "d",
-    "M-52 6 Q-47 -2 -41 2 " +
-    "L-35 9 Q-32 14 -37 18 " +
-    "Q-42 21 -47 16 L-55 12 Z"
+    "M132 -5 Q145 -20 162 -7 " +
+    "L178 9 Q189 23 176 37 " +
+    "Q162 48 148 34 L134 18 Q123 7 132 -5 Z"
   );
   littleFinger.setAttribute("fill", skin);
   littleFinger.setAttribute("stroke", outline);
-  littleFinger.setAttribute("stroke-width", "2.5");
+  littleFinger.setAttribute("stroke-width", "4");
   hand.appendChild(littleFinger);
 
-  // Ngón cái ôm thân bút
-  const thumb = createSvgElement("path");
-  thumb.setAttribute(
-    "d",
-    "M-52 8 Q-45 -1 -36 1 " +
-    "L-24 6 Q-16 9 -17 16 " +
-    "Q-19 23 -27 20 " +
-    "L-41 15 Q-49 19 -54 14 Z"
-  );
-  thumb.setAttribute("fill", "#f6bd98");
-  thumb.setAttribute("stroke", outline);
-  thumb.setAttribute("stroke-width", "3");
-  thumb.setAttribute("stroke-linejoin", "round");
-  hand.appendChild(thumb);
+  // Bóng đổ trên lòng bàn tay
+  const shadowLine = createSvgElement("path");
+shadowLine.setAttribute(
+  "d",
+  "M83 -35 Q111 -15 143 -15 Q165 -14 181 -31"
+);
+shadowLine.setAttribute("fill", "none");
+shadowLine.setAttribute("stroke", shadowColor);
+shadowLine.setAttribute("stroke-width", "6");
+shadowLine.setAttribute("stroke-linecap", "round");
+hand.appendChild(shadowLine);
 
-  // Nếp gấp lòng bàn tay
-  const crease = createSvgElement("path");
-  crease.setAttribute(
+  // Các nếp gấp ngón tay
+  const creases = createSvgElement("path");
+  creases.setAttribute(
     "d",
-    "M-43 10 Q-34 15 -26 12"
+    "M104 -105 Q115 -96 121 -86 " +
+    "M122 -29 Q132 -23 138 -13 " +
+    "M148 6 Q155 13 157 20"
   );
-  crease.setAttribute("fill", "none");
-  crease.setAttribute("stroke", shadowSkin);
-  crease.setAttribute("stroke-width", "2");
-  crease.setAttribute("stroke-linecap", "round");
-  hand.appendChild(crease);
+  creases.setAttribute("fill", "none");
+  creases.setAttribute("stroke", shadowColor);
+  creases.setAttribute("stroke-width", "3");
+  creases.setAttribute("stroke-linecap", "round");
+  hand.appendChild(creases);
 
-  // Điểm sáng trên bàn tay
-  const highlight = createSvgElement("path");
-  highlight.setAttribute(
+  // Điểm sáng trên da
+  const highlights = createSvgElement("path");
+  highlights.setAttribute(
     "d",
-    "M-37 -18 Q-29 -22 -24 -16"
+    "M91 -158 Q108 -172 126 -155 " +
+    "M171 -105 Q190 -83 190 -59 " +
+    "M79 -84 Q88 -94 99 -89"
   );
-  highlight.setAttribute("fill", "none");
-  highlight.setAttribute("stroke", "#ffe1c9");
-  highlight.setAttribute("stroke-width", "2.5");
-  highlight.setAttribute("stroke-linecap", "round");
-  hand.appendChild(highlight);
+  highlights.setAttribute("fill", "none");
+  highlights.setAttribute("stroke", "#ffe3cc");
+  highlights.setAttribute("stroke-width", "4");
+  highlights.setAttribute("stroke-linecap", "round");
+  hand.appendChild(highlights);
 
   return hand;
 }
