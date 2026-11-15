@@ -449,6 +449,128 @@ function clearAnimation() {
 function wait(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
+  
+
+function createDrawingHand() {
+  const hand = createSvgElement("g");
+  hand.setAttribute("pointer-events", "none");
+
+  // Cây bút
+  const pen = createSvgElement("path");
+  pen.setAttribute("d", "M-82 0 L-7 0");
+  pen.setAttribute("stroke", "#292929");
+  pen.setAttribute("stroke-width", "10");
+  pen.setAttribute("stroke-linecap", "round");
+  hand.appendChild(pen);
+
+  // Thân bút màu vàng
+  const penBody = createSvgElement("path");
+  penBody.setAttribute("d", "M-70 0 L-13 0");
+  penBody.setAttribute("stroke", "#f4bd42");
+  penBody.setAttribute("stroke-width", "6");
+  penBody.setAttribute("stroke-linecap", "round");
+  hand.appendChild(penBody);
+
+  // Vòng trang trí trên bút
+  const ring = createSvgElement("path");
+  ring.setAttribute("d", "M-22 -4 L-22 4");
+  ring.setAttribute("stroke", "#292929");
+  ring.setAttribute("stroke-width", "2");
+  hand.appendChild(ring);
+
+  // Ngòi bút
+  const tip = createSvgElement("path");
+  tip.setAttribute("d", "M0 0 L-12 -5 L-12 5 Z");
+  tip.setAttribute("fill", "#292929");
+  hand.appendChild(tip);
+
+  // Ống tay áo
+  const sleeve = createSvgElement("path");
+  sleeve.setAttribute(
+    "d",
+    "M-78 -17 Q-66 -23 -53 -14 L-45 13 Q-60 22 -73 13 Z"
+  );
+  sleeve.setAttribute("fill", "#4d91d8");
+  sleeve.setAttribute("stroke", "#292929");
+  sleeve.setAttribute("stroke-width", "3");
+  hand.appendChild(sleeve);
+
+  // Cổ tay
+  const wrist = createSvgElement("path");
+  wrist.setAttribute(
+    "d",
+    "M-57 -15 Q-45 -21 -36 -12 L-28 13 Q-39 21 -51 12 Z"
+  );
+  wrist.setAttribute("fill", "#f4b58e");
+  wrist.setAttribute("stroke", "#292929");
+  wrist.setAttribute("stroke-width", "2.5");
+  hand.appendChild(wrist);
+
+  // Lòng bàn tay
+  const palm = createSvgElement("path");
+  palm.setAttribute(
+    "d",
+    "M-43 -17 Q-35 -25 -27 -19 " +
+    "Q-22 -25 -16 -19 " +
+    "Q-9 -15 -12 -7 " +
+    "Q-5 -1 -12 7 " +
+    "Q-17 18 -31 17 " +
+    "Q-44 15 -50 5 Z"
+  );
+  palm.setAttribute("fill", "#ffc69e");
+  palm.setAttribute("stroke", "#292929");
+  palm.setAttribute("stroke-width", "3");
+  palm.setAttribute("stroke-linejoin", "round");
+  hand.appendChild(palm);
+
+  // Các ngón tay ôm lấy thân bút
+  const fingers = createSvgElement("path");
+  fingers.setAttribute(
+    "d",
+    "M-38 -13 Q-30 -19 -23 -12 " +
+    "L-15 -5 Q-11 0 -17 4 " +
+    "Q-21 7 -26 2 " +
+    "L-35 -3"
+  );
+  fingers.setAttribute("fill", "#ffd4b1");
+  fingers.setAttribute("stroke", "#292929");
+  fingers.setAttribute("stroke-width", "2.5");
+  fingers.setAttribute("stroke-linejoin", "round");
+  hand.appendChild(fingers);
+
+  // Ngón cái
+  const thumb = createSvgElement("path");
+  thumb.setAttribute(
+    "d",
+    "M-47 1 Q-39 -5 -31 1 L-24 8 " +
+    "Q-20 14 -26 17 Q-32 19 -37 12 L-48 8 Z"
+  );
+  thumb.setAttribute("fill", "#f4b58e");
+  thumb.setAttribute("stroke", "#292929");
+  thumb.setAttribute("stroke-width", "2.5");
+  hand.appendChild(thumb);
+
+  return hand;
+}
+
+
+function moveDrawingHand(hand, path, distance) {
+  const point = path.getPointAtLength(distance);
+  const next = path.getPointAtLength(
+    Math.min(distance + 1, path.getTotalLength())
+  );
+
+  const angle = Math.atan2(
+    next.y - point.y,
+    next.x - point.x
+  ) * 180 / Math.PI;
+
+  hand.setAttribute(
+    "transform",
+    `translate(${point.x} ${point.y}) rotate(${angle})`
+  );
+}
+
 
 async function playDrawing(data) {
   if (!data || !Array.isArray(data.groups)) return;
@@ -505,24 +627,46 @@ async function playDrawing(data) {
         Math.min(1600, length * 3)
       );
 
-      const animation = path.animate(
-        [
-          { strokeDashoffset: length },
-          { strokeDashoffset: 0 }
-        ],
-        {
-          duration,
-          easing: "linear",
-          fill: "forwards"
-        }
-      );
+      
+const hand = createDrawingHand();
+animationSvg.appendChild(hand);
 
-      await animation.finished.catch(() => {});
+const startTime = performance.now();
 
-      if (runId !== animationRun) return;
-
-      path.style.strokeDashoffset = "0";
+await new Promise(resolve => {
+  function drawFrame(now) {
+    if (runId !== animationRun) {
+      hand.remove();
+      resolve();
+      return;
     }
+
+    const progress = Math.min(
+      1,
+      (now - startTime) / duration
+    );
+
+    const distance = length * progress;
+
+    path.style.strokeDashoffset =
+      String(length - distance);
+
+    moveDrawingHand(hand, path, distance);
+
+    if (progress < 1) {
+      requestAnimationFrame(drawFrame);
+    } else {
+      path.style.strokeDashoffset = "0";
+      hand.remove();
+      resolve();
+    }
+  }
+
+  requestAnimationFrame(drawFrame);
+});
+
+if (runId !== animationRun) return;
+        }
 
     // Tô màu và chờ hoàn thành trước khi sang nhóm mới.
     for (const fillElement of fillElements) {
