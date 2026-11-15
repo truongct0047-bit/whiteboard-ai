@@ -115,15 +115,46 @@ form.addEventListener("submit", async function(e) {
       throw new Error(data.error || "Có lỗi xảy ra.");
     }
 
-    let script = data.script;
+    
+let script = data.script;
 
-    if (typeof script === "string") {
+if (typeof script === "string") {
+  let cleaned = script.trim();
+
+  // Loại bỏ dấu Markdown nếu AI trả về JSON trong khung mã
+  cleaned = cleaned.replace(/^\s*```(?:json)?\s*/i, "");
+  cleaned = cleaned.replace(/\s*```\s*$/, "");
+
+  try {
+    script = JSON.parse(cleaned);
+  } catch (error) {
+    const start = cleaned.indexOf("{");
+    const end = cleaned.lastIndexOf("}");
+
+    if (start !== -1 && end > start) {
       try {
-        script = JSON.parse(script);
-      } catch {
-        script = { introduction: script };
+        script = JSON.parse(cleaned.slice(start, end + 1));
+      } catch (error2) {
+        throw new Error("AI trả về JSON không hợp lệ.");
       }
+    } else {
+      throw new Error("AI trả về JSON không hợp lệ.");
     }
+  }
+}
+
+if (!script || typeof script !== "object") {
+  throw new Error("Không đọc được dữ liệu kịch bản.");
+}
+
+if (!Array.isArray(script.scenes) && Array.isArray(script.script?.scenes)) {
+  script = script.script;
+}
+
+if (!Array.isArray(script.scenes)) {
+  throw new Error("Kịch bản chưa có danh sách phân cảnh. Vui lòng tạo lại.");
+}
+
 
     const output = document.createElement("div");
     output.id = "ai-result";
