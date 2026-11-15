@@ -2,6 +2,8 @@
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
+
+    // API TẠO HÌNH MINH HỌA
     if (url.pathname === "/api/image") {
       if (request.method !== "POST") {
         return Response.json(
@@ -22,18 +24,49 @@ export default {
           );
         }
 
+        // Chuyển mô tả cảnh thành prompt hình ảnh rõ ràng.
+        const translated = await env.AI.run(
+          "@cf/meta/llama-3.2-3b-instruct",
+          {
+            messages: [
+              {
+                role: "system",
+                content:
+                  "You are an expert visual prompt writer for educational whiteboard illustrations. Convert the Vietnamese scene description into concise, literal English visual instructions. Preserve the exact subject, action, number of objects, and setting. Describe only what should be visible. Do not add unrelated objects, people, labels, captions, letters, or text. Return only the English visual description."
+              },
+              {
+                role: "user",
+                content: description
+              }
+            ],
+            max_tokens: 220
+          }
+        );
+
+        const visualDescription = String(
+          translated.response || description
+        ).trim();
+
         const prompt =
-          "A clean whiteboard animation illustration, black ink hand-drawn line art on a pure white background, simple educational infographic, bold smooth outlines, minimal details, no color, no text, no watermark. Style: " +
-          style +
-          ". Scene: " + description;
+          "Create a clear educational hand-drawn whiteboard illustration. " +
+          "Show exactly this scene: " + visualDescription + ". " +
+          "Use clean black ink outlines, simple recognizable shapes, " +
+          "balanced composition, pure white background, " +
+          "consistent line thickness, minimal visual clutter. " +
+          "No words, no letters, no numbers, no labels, " +
+          "no captions, no watermark, no border. " +
+          "Style: " + style + ".";
 
         const result = await env.AI.run(
           "@cf/black-forest-labs/flux-1-schnell",
-          { prompt, steps: 4 }
+          {
+            prompt: prompt.slice(0, 2048),
+            steps: 4
+          }
         );
 
         if (!result || !result.image) {
-          throw new Error("Không nhận được hình ảnh.");
+          throw new Error("Không nhận được hình ảnh từ AI.");
         }
 
         return Response.json({
@@ -48,6 +81,8 @@ export default {
         );
       }
     }
+
+    // API TẠO KỊCH BẢN
     if (url.pathname === "/api/generate") {
       if (request.method !== "POST") {
         return Response.json(
@@ -78,12 +113,23 @@ export default {
               {
                 role: "system",
                 content:
-                  "Bạn là biên kịch video whiteboard animation bằng tiếng Việt. Hãy tạo kịch bản dễ hiểu, hấp dẫn, chia thành các phân cảnh. Trả về JSON hợp lệ, không dùng Markdown, theo cấu trúc: {title:string, introduction:string, scenes:[{scene:number, narration:string, drawing:string, subtitle:string}], conclusion:string}. Nội dung phải phù hợp thời lượng yêu cầu."
+                  "Bạn là biên kịch video whiteboard animation bằng tiếng Việt. " +
+                  "Hãy tạo kịch bản dễ hiểu, chính xác, hấp dẫn và chia thành các phân cảnh logic. " +
+                  "Mỗi trường drawing phải mô tả một hình ảnh cụ thể, trực quan, có chủ thể và hành động rõ ràng. " +
+                  "Không dùng mô tả trừu tượng hoặc chung chung. " +
+                  "Trả về JSON hợp lệ, không Markdown, theo cấu trúc: " +
+                  "{title:string, introduction:string, scenes:[{scene:number, narration:string, drawing:string, subtitle:string}], conclusion:string}."
               },
               {
                 role: "user",
                 content:
-                  `Chủ đề: ${topic}\nThời lượng: ${duration}\nTỷ lệ: ${format}\nGiọng đọc: ${voice}\nPhong cách: ${style}\nHãy tạo kịch bản chi tiết bằng tiếng Việt.`
+                  `Chủ đề: ${topic}\n` +
+                  `Thời lượng: ${duration}\n` +
+                  `Tỷ lệ: ${format}\n` +
+                  `Giọng đọc: ${voice}\n` +
+                  `Phong cách: ${style}\n` +
+                  "Hãy tạo kịch bản chi tiết bằng tiếng Việt. " +
+                  "Mỗi cảnh chỉ tập trung vào một hành động hoặc một ý chính."
               }
             ],
             max_tokens: 3000
@@ -94,6 +140,7 @@ export default {
           success: true,
           script: result.response || result
         });
+
       } catch (error) {
         return Response.json(
           { error: "Không tạo được kịch bản: " + error.message },
