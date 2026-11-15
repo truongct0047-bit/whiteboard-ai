@@ -15,7 +15,7 @@ export default {
       try {
         const body = await request.json();
         const description = String(body.description || "").trim();
-        const style = String(body.style || "Vẽ tay trắng đen").trim();
+        const style = String(body.style || "Vẽ tay màu");
 
         if (!description || description.length > 1500) {
           return Response.json(
@@ -48,14 +48,18 @@ export default {
         ).trim();
 
         const prompt =
-          "Create a clear educational hand-drawn whiteboard illustration. " +
-          "Show exactly this scene: " + visualDescription + ". " +
-          "Use clean black ink outlines, simple recognizable shapes, " +
-          "balanced composition, pure white background, " +
-          "consistent line thickness, minimal visual clutter. " +
-          "No words, no letters, no numbers, no labels, " +
-          "no captions, no watermark, no border. " +
-          "Style: " + style + ".";
+  "Create a beautiful full-color educational hand-drawn illustration. " +
+  "Show exactly this scene: " + visualDescription + ". " +
+  "Use vivid, natural, scientifically appropriate colors. " +
+  "Color every main object and every visible detail completely. " +
+  "Use clean, bold black ink outlines with smooth, consistent line thickness. " +
+  "Use simple recognizable shapes, clear details and balanced composition. " +
+  "Keep colors bright, harmonious and consistent across all illustrations. " +
+  "Use a pure white background with no unnecessary decorations. " +
+  "Never use black-and-white, grayscale, monochrome or pencil-only rendering. " +
+  "No words, no letters, no numbers, no labels, " +
+  "no captions, no watermark, no border. " +
+  "Style: " + style + ".";
 
                 // Chọn kích thước ảnh theo tỷ lệ video.
         const requestedRatio = String(body.aspectRatio || "16:9 YouTube");
@@ -120,7 +124,7 @@ export default {
         const duration = String(body.duration || "5 phút");
         const format = String(body.format || "16:9");
         const voice = String(body.voice || "Giọng nữ");
-        const style = String(body.style || "Vẽ tay trắng đen");
+        const style = String(body.style || "Vẽ tay màu").trim();
 
         if (!topic || topic.length > 1000) {
           return Response.json(
