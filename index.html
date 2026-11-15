@@ -157,6 +157,54 @@ form.addEventListener("submit", async function(e) {
             output.appendChild(p);
           }
         });
+                const imageButton = document.createElement("button");
+        imageButton.type = "button";
+        imageButton.textContent = "✦ TẠO HÌNH MINH HỌA";
+        imageButton.style.cssText =
+          "background:white;color:black;width:100%;padding:14px;border:0;border-radius:10px;font-weight:bold;cursor:pointer";
+
+        const imageBox = document.createElement("div");
+        imageBox.style.cssText = "margin-top:12px";
+
+        imageButton.onclick = async function() {
+          imageButton.disabled = true;
+          imageButton.textContent = "ĐANG VẼ HÌNH...";
+
+          try {
+            const response = await fetch("/api/image", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                description: scene.drawing || scene.narration || scene.subtitle,
+                style: document.getElementById("style").value
+              })
+            });
+
+            const data = await response.json();
+
+            if (!response.ok || !data.success) {
+              throw new Error(data.error || "Không tạo được hình.");
+            }
+
+            imageBox.innerHTML = "";
+            const img = document.createElement("img");
+            img.src = data.image;
+            img.alt = "Hình minh họa phân cảnh";
+            img.style.cssText =
+              "width:100%;height:auto;border-radius:10px;background:white";
+            imageBox.appendChild(img);
+
+            imageButton.textContent = "✦ TẠO LẠI HÌNH";
+          } catch (error) {
+            imageButton.textContent = "THỬ TẠO LẠI";
+            alert(error.message);
+          } finally {
+            imageButton.disabled = false;
+          }
+        };
+
+        output.appendChild(imageButton);
+        output.appendChild(imageBox);
       });
     }
 
