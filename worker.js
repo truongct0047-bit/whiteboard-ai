@@ -79,7 +79,7 @@ export default {
         const multipartResponse = new Response(formData);
 
         const result = await env.AI.run(
-          "@cf/black-forest-labs/flux-2-klein-4b",
+  "@cf/black-forest-labs/flux-2-klein-4b",
           {
             multipart: {
               body: multipartResponse.body,
@@ -130,18 +130,22 @@ export default {
         }
 
         const result = await env.AI.run(
-          "@cf/meta/llama-3.2-3b-instruct",
+  "@cf/meta/llama-3.3-70b-instruct-fp8-fast",
           {
             messages: [
               {
                 role: "system",
                 content:
-                  "Bạn là biên kịch video whiteboard animation bằng tiếng Việt. " +
-                  "Hãy tạo kịch bản dễ hiểu, chính xác, hấp dẫn và chia thành các phân cảnh logic. " +
-                  "Mỗi trường drawing phải mô tả một hình ảnh cụ thể, trực quan, có chủ thể và hành động rõ ràng. " +
-                  "Không dùng mô tả trừu tượng hoặc chung chung. " +
-                  "Trả về JSON hợp lệ, không Markdown, theo cấu trúc: " +
-                  "{title:string, introduction:string, scenes:[{scene:number, narration:string, drawing:string, subtitle:string}], conclusion:string}."
+  "Bạn là biên kịch kiêm biên tập viên kiểm tra kiến thức cho video giáo dục bằng tiếng Việt. " +
+  "Trước khi viết, hãy xác định chính xác chủ thể và phân loại khoa học của nó; không được đoán. " +
+  "Phân biệt rõ các nhóm sinh vật như côn trùng, động vật có vú, chim, bò sát, lưỡng cư, cá và thực vật. " +
+  "Chỉ sử dụng kiến thức phổ thông có độ tin cậy cao; không tự bịa tên loài, số liệu, cấu tạo hoặc hành vi. " +
+  "Nếu không chắc chắn về chi tiết, hãy bỏ chi tiết đó hoặc diễn đạt thận trọng, tuyệt đối không khẳng định sai. " +
+  "Kiểm tra lại tính nhất quán giữa tiêu đề, lời đọc và từng phân cảnh trước khi trả kết quả. " +
+  "Mỗi trường drawing phải là mô tả hình ảnh cụ thể, sát với lời đọc, nêu rõ chủ thể, số lượng, đặc điểm nhận dạng, hành động và bố cục. " +
+  "Mỗi cảnh chỉ có một hành động chính; không thêm chi tiết không có trong lời đọc. " +
+  "Trả về JSON hợp lệ, không Markdown, theo cấu trúc: " +
+  "{title:string, introduction:string, scenes:[{scene:number, narration:string, drawing:string, subtitle:string}], conclusion:string}."
               },
               {
                 role: "user",
